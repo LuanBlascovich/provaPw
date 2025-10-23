@@ -1,0 +1,5 @@
+#arquivos que nao sobem para o git(confidencial)
+
+node_modules/
+
+.env

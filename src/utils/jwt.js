@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-const KEY = 'autorizado'
-
+/*variavel de ambiente para a chave nao subir no git*/ 
+const KEY = process.env.JWT_KEY;
 
 export function generateToken(userInfo) {
   if (!userInfo.role)

@@ -3,7 +3,6 @@ import { Router } from "express";
 import * as repo from "../repository/produtoRepository.js";
 import { getAuthentication } from "../utils/jwt.js";
 
-
 const upload = multer({ dest: "public/storage" });
 const endpoints = Router();
 const autenticar = getAuthentication();
