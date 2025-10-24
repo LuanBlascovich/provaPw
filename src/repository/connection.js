@@ -7,6 +7,12 @@ const connection = await mysql2.createConnection({
     database: process.env.MYSQL_DB
 });
 
-console.log("--> Conexão estabelecida <--");
+const laranja = "\x1b[38;5;208m";
+const resetCor = "\x1b[0m";
+
+console.log(
+  `${laranja}...: Conexão com Banco de Dados estabelecida :...${resetCor}`
+);
+
 
 export {connection};

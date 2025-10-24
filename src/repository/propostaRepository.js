@@ -56,12 +56,13 @@ export async function buscarPropostaPorId(id) {
 
 // Atualizar status da proposta (aceita / rejeitada)
 export async function atualizarStatus(id, status) {
+  const valor = (status.toLowerCase() === "aceitar") ? true : false; // mapear string para boolean
   const comando = `
     UPDATE proposta
        SET aprovacao = ?
      WHERE id = ?;
   `;
-  const [info] = await connection.query(comando, [status, id]);
+  const [info] = await connection.query(comando, [valor, id]);
   return info.affectedRows;
 }
 

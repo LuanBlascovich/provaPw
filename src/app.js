@@ -10,5 +10,11 @@ api.use(express.json());
 
 adicionarRotas(api);
 
-const PORT = process.env.PORT
-api.listen(PORT, ()=> console.log("--> API subiu!! <--") )
+const PORT = process.env.PORT;
+
+const laranja = "\x1b[38;5;208m";
+const resetCor = "\x1b[0m";
+
+api.listen(PORT, () => {
+  console.log(`${laranja}...: API subiu na porta ${PORT} :...${resetCor}`);
+});
