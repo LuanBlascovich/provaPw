@@ -5,7 +5,7 @@ CREATE TABLE usuario(
 id INT PRIMARY KEY AUTO_INCREMENT,
 nome VARCHAR(200),
 email VARCHAR(200),
-senha VARCHAR(20)
+senha VARCHAR(255)
 );
 
 CREATE TABLE produto(

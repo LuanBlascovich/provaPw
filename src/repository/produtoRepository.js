@@ -1,4 +1,4 @@
-import { connection } from "./conection.js";
+import { connection } from "./connection.js";
 
 export async function cadastrarProd(idUsuario, produto, imagem) {
     const comando = `
