@@ -21,7 +21,7 @@ export async function criarProposta(
   return info.insertId;
 }
 
-export async function autorizarProposta(produtoId, usuarioId) {
+/*export async function autorizarProposta(produtoId, usuarioId) {
   const comando = `
         UPDATE proposta
         SET aprovacao = TRUE
@@ -30,7 +30,7 @@ export async function autorizarProposta(produtoId, usuarioId) {
     `;
   const [info] = await connection.query(comando, [produtoId, usuarioId]);
   return info.affectedRows;
-}
+}*/
 
 export async function verificarProposta(produtoId, usuarioId) {
   const comando = `
@@ -56,7 +56,7 @@ export async function buscarPropostaPorId(id) {
 
 // Atualizar status da proposta (aceita / rejeitada)
 export async function atualizarStatus(id, status) {
-  const valor = (status.toLowerCase() === "aceitar") ? true : false; // mapear string para boolean
+  const valor = (status.toLowerCase() === "aceita" || status.toLowerCase() === "aceitar") ? true : false;
   const comando = `
     UPDATE proposta
        SET aprovacao = ?
@@ -85,3 +85,4 @@ export async function listarPropostasPorDono(usuarioId) {
   const [linhas] = await connection.query(comando, [usuarioId]);
   return linhas;
 }
+

@@ -24,7 +24,8 @@ endpoints.post("/proposta/:produtoId", autenticar, async (req, resp) => {
     if (produto.id_dono === usuarioId)
       return resp.status(403).send({ erro: "Você não pode fazer proposta no seu próprio produto." });
 
-    const propostaId = await propostaRepo.criarAprovacao(
+    // ✅ CORREÇÃO: função correta do repository
+    const propostaId = await propostaRepo.criarProposta(
       produtoId,
       usuarioId,
       valorProposta,
@@ -64,7 +65,7 @@ endpoints.put("/proposta/:id/aprovacao", autenticar, async (req, resp) => {
     if (!produto || produto.id_dono !== usuarioLogadoId)
       return resp.status(403).send({ erro: "Apenas o dono do produto pode responder propostas." });
 
-    if (aprovacao === "aceitar") {
+    if (aprovacao.toLowerCase() === "aceitar") {
       await propostaRepo.atualizarStatus(propostaId, "aceita");
       await produtoRepo.atualizarDisponibilidade(produto.id, false);
       resp.status(200).send({ mensagem: "Proposta aceita e produto marcado como indisponível." });
