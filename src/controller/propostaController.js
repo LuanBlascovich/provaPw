@@ -23,7 +23,7 @@ endpoints.post("/proposta/:produtoId", autenticar, async (req, resp) => {
     if (produto.id_dono === usuarioId)
       return resp.status(403).send({ erro: "Você não pode fazer proposta no seu próprio produto." });
 
-    // ✅ CORREÇÃO: função correta do repository
+    
     const propostaId = await propostaRepo.criarProposta(
       produtoId,
       usuarioId,
