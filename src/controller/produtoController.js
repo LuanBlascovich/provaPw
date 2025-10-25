@@ -7,125 +7,56 @@ const upload = multer({ dest: "public/storage" });
 const endpoints = Router();
 const autenticar = getAuthentication();
 
-endpoints.post(
-  "/usuario/:id/produto",
-  autenticar,
-  upload.single("imagem"),
-  async (req, resp) => {
-    try {
-      const idUsuario = req.params.id;
-      const produto = req.body;
-      const imagem = req.file.path;
-
-      const novoId = await repo.cadastrarProd(idUsuario, produto, imagem);
-      resp.send({ novoId });
-    } catch (err) {
-      console.error(err);
-      resp.status(500).send({
-        Erro: "Erro ao cadastrar o produto. Verifique o parâmetros.",
-      });
-    }
-  }
-);
-
-endpoints.put(
-  "/usuario/:id/produto/:idProduto",
-  autenticar,
-  upload.single("imagem"),
-  async (req, resp) => {
-    try {
-      const idUsuario = req.params.id;
-      const idProduto = req.params.idProduto;
-
-      // Checagem de propriedade
-      const produtoEncontrado = await repo.buscarProdId(idProduto);
-      if (
-        !produtoEncontrado[0] ||
-        produtoEncontrado[0].id_usuario != idUsuario
-      ) {
-        return resp.status(403).send({
-          Erro: "Você não pode alterar/excluir produto de outro usuário.",
-        });
-      }
-
-      const produto = req.body;
-      const imagem = req.file.path;
-
-      const linhasAfetadas = await repo.alterarProd(idProduto, produto, imagem);
-      if (linhasAfetadas === 0)
-        return resp.status(400).send({ Erro: "Produto não encontrado" });
-
-      resp.send({ linhasAfetadas });
-    } catch (err) {
-      console.error(err);
-      resp.status(500).send({
-        Erro: "Erro ao alterar o produto. Verifique o parâmetros.",
-      });
-    }
-  }
-);
-
-endpoints.delete(
-  "/usuario/:id/produto/:idProduto",
-  autenticar,
-  async (req, resp) => {
-    try {
-      const idProduto = req.params.idProduto;
-      const idUsuario = req.params.id;
-
-      // Checagem de propriedade
-      const produtoEncontrado = await repo.buscarProdId(idProduto);
-      if (
-        !produtoEncontrado[0] ||
-        produtoEncontrado[0].id_usuario != idUsuario
-      ) {
-        return resp.status(403).send({
-          Erro: "Você não pode alterar/excluir produto de outro usuário.",
-        });
-      }
-
-      const linhasAfetadas = await repo.deletarProd(idProduto);
-      if (linhasAfetadas === 0)
-        return resp.status(400).send({ Erro: "Produto não encontrado." });
-
-      resp.send({ linhasAfetadas });
-    } catch (err) {
-      console.error(err);
-      resp.status(500).send({
-        Erro: "Erro ao Deletar o produto.",
-      });
-    }
-  }
-);
-
-endpoints.get("/produto/listar", async (req, resp) => {
-  try {
-    const produtos = await repo.buscarProd();
-    resp.send({ produtos });
-  } catch (err) {
-    console.error(err);
-    resp.status(500).send({
-      Erro: "Erro o listar os produtos.",
-    });
-  }
+endpoints.post("/produto/postar", autenticar, upload.single("imagem"), async (req, resp) => {
+  const idUsuarioLogado = req.user.id;
+  const caminhoImagem = req.file.path;
+  const produto = req.body;
+  const novoId = await repo.postarProd(idUsuarioLogado, produto, caminhoImagem);
+  resp.send({ novoId: novoId });
 });
 
-endpoints.get("/usuario/:id/produto", autenticar, async (req, resp) => {
-  try {
-    const idUsuario = req.params.id;
+endpoints.put("/produto/alterar/:idProduto", autenticar, upload.single("imagem"), async (req, resp) => {
+  const idUsuarioLogado = req.user.id;
+  const idProduto = req.params.idProduto;
 
-    const produtos = await repo.buscarProdId(idUsuario);
-
-    if (produtos.length === 0)
-      return resp.status(400).send({ Erro: "Nenhum produto encontrado." });
-
-    resp.send({ produtos });
-  } catch (err) {
-    console.error(err);
-    resp.status(500).send({
-      Erro: "Erro ao buscar os produtos do usuário.",
-    });
+  const verificacao = await repo.verificacaoDono(idUsuarioLogado, idProduto);
+  if (verificacao == null) {
+    return resp.status(401).send({ Erro: "Você não possui autorização para realizar essa ação ou o produto não foi encontrado" });
   }
+
+  const produto = req.body;
+  const caminhoImagem = req.file.path;
+  const registrosAfetados = await repo.alterarProd(idProduto, produto, caminhoImagem);
+  resp.send({ registrosAfetados: registrosAfetados });
+});
+
+endpoints.delete("/produto/deletar/:idProduto", autenticar, async (req, resp) => {
+  const idUsuarioLogado = req.user.id;
+  const idProduto = req.params.idProduto;
+
+  const verificacao = await repo.verificacaoDono(idUsuarioLogado, idProduto);
+  if (verificacao == null) {
+    return resp.status(401).send({ Erro: "Você não possui autorização para realizar essa ação ou o produto não foi encontrado" });
+  }
+
+  const registrosAfetados = await repo.deletarProd(idProduto);
+  resp.send({ registrosAfetados: registrosAfetados });
+});
+
+endpoints.get("/produto/listar/:idUsuario", autenticar, async (req, resp) => {
+  const idUsuario = req.params.idUsuario;
+  const produtos = await repo.listarProdutosUsuario(idUsuario);
+  resp.send({ produtos });
+});
+
+endpoints.get("/produto/listar", autenticar, async (req, resp) => {
+  const { nome, precoMin, precoMax } = req.query;
+
+  const min = Number(precoMin);
+  const max = Number(precoMax);
+
+  const produtos = await repo.listarProdutos(nome, min, max);
+  resp.send({ produtos });
 });
 
 export default endpoints;

@@ -1,61 +1,92 @@
 import { connection } from "./connection.js";
 
-export async function cadastrarProd(idUsuario, produto, imagem) {
+export async function postarProd(idUsuarioLogado, produto, caminhoImagem) {
     const comando = `
-        insert into produto (id_usuario, nome, descricao, preco, imagem)
-        values (?, ?, ?, ?, ?)
-    `;
+        INSERT INTO produto(nome, imagem, preco, descricao, 
+        disponibilidade, criacao, id_dono)
+        VALUES (?, ?, ?, ?, TRUE, NOW(), ?)`;
     const [info] = await connection.query(comando, [
-        idUsuario,
         produto.nome,
-        produto.descricao,
+        caminhoImagem,
         produto.preco,
-        imagem
+        produto.descricao,
+        idUsuarioLogado
     ]);
     return info.insertId;
 }
 
-export async function alterarProd(idProduto,produto, imagem){
+export async function verificacaoDono(idUsuarioLogado, idProduto) {
     const comando = `
-    update produto
-    set nome = ?, descricao = ?, preco = ?, imagem = ?
-    where id = ?
-    `;
+    SELECT id FROM produto WHERE id_dono = ? AND id = ?`;
+    const [info] = await connection.query(comando, [idUsuarioLogado, idProduto]);
+    return info[0];
+}
+
+export async function alterarProd(idProduto, produto, caminhoImagem) {
+    const comando = `
+    UPDATE produto SET nome = ?, imagem = ?, preco = ?, 
+    descricao = ?, disponibilidade = ?
+    WHERE id = ?`;
     const [info] = await connection.query(comando, [
         produto.nome,
-        produto.descricao,
+        caminhoImagem,
         produto.preco,
-        imagem,
+        produto.descricao,
+        produto.disponibilidade,
         idProduto
     ]);
     return info.affectedRows;
 }
 
-export async function deletarProd(idProduto){
-    const comando = `
-        delete from produto 
-        where id = ?
-    `;
-    const [info] = await connection.query(comando,[idProduto]);
+export async function deletarProd(idProduto) {
+    const comando = `DELETE FROM produto WHERE id = ?`;
+    const [info] = await connection.query(comando, [idProduto]);
     return info.affectedRows
 }
 
-export async function buscarProd(){
+export async function listarProdutos(nomeProduto, precoMin, precoMax) {
+    if (nomeProduto && precoMin != null && precoMax != null) {
+        return listarProdutosCompleto(nomeProduto, precoMin, precoMax);
+    } else if (!nomeProduto && precoMin != null && precoMax != null) {
+        return listarProdutosPreco(precoMin, precoMax);
+    } else if (nomeProduto) {
+        return listarProdutosNome(nomeProduto);
+    } else {
+        return listarProdutosNome("");
+    }
+}
+
+async function listarProdutosCompleto(nomeProduto, precoMin, precoMax) {
     const comando = `
-        SELECT p.id, p.nome, p.descricao, p.preco, p.imagem, u.nome AS usuario
-        FROM produto p
-        INNER JOIN usuario u ON u.id = p.id_usuario
-    `;
-    const [info] = await connection.query(comando);
+        SELECT usuario.id, usuario.nome, produto.id, produto.nome, imagem, preco, descricao, disponibilidade, 
+        criacao FROM produto INNER JOIN usuario ON produto.id_dono = usuario.id 
+        WHERE disponibilidade = true AND produto.nome LIKE ? AND preco BETWEEN ? AND ?`;
+    const [info] = await connection.query(comando, ["%" + nomeProduto + "%", precoMin, precoMax]);
     return info;
 }
 
-export async function buscarProdId(idUsuario){
+async function listarProdutosNome(nomeProduto) {
     const comando = `
-        select id, nome, descricao, preco, imagem
-        from produto
-        where id = ?
-    `;
-    const [info] = await connection.query(comando,[idUsuario]);
+        SELECT usuario.id, usuario.nome, produto.id, produto.nome, imagem, preco, descricao, disponibilidade, 
+        criacao FROM produto INNER JOIN usuario ON produto.id_dono = usuario.id 
+        WHERE disponibilidade = true AND produto.nome LIKE ?`;
+    const [info] = await connection.query(comando, ["%" + nomeProduto + "%"]);
+    return info;
+}
+
+async function listarProdutosPreco(precoMin, precoMax) {
+    const comando = `
+        SELECT usuario.id, usuario.nome, produto.id, produto.nome, imagem, preco, descricao, disponibilidade, 
+        criacao FROM produto INNER JOIN usuario ON produto.id_dono = usuario.id 
+        WHERE disponibilidade = true AND preco BETWEEN ? AND ?`;
+    const [info] = await connection.query(comando, [precoMin, precoMax]);
+    return info;
+}
+
+export async function listarProdutosUsuario(idUsuario) {
+    const comando = `
+        SELECT usuario.id, usuario.nome, produto.id, produto.nome, imagem, preco, descricao, disponibilidade, 
+        criacao FROM produto INNER JOIN usuario ON produto.id_dono = usuario.id WHERE disponibilidade = true AND id_dono = ?`;
+    const [info] = await connection.query(comando, [idUsuario]);
     return info;
 }

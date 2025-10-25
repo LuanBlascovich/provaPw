@@ -10,6 +10,7 @@ senha VARCHAR(255)
 
 CREATE TABLE produto(
 id INT PRIMARY KEY AUTO_INCREMENT,
+nome VARCHAR(200),
 imagem VARCHAR(400),
 preco DECIMAL(10,2),
 descricao VARCHAR(150),

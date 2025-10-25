@@ -43,7 +43,6 @@ export async function verificarProposta(produtoId, usuarioId) {
   return registros[0];
 }
 
-// Buscar proposta por ID
 export async function buscarPropostaPorId(id) {
   const comando = `
     SELECT *
@@ -54,9 +53,8 @@ export async function buscarPropostaPorId(id) {
   return linhas[0];
 }
 
-// Atualizar status da proposta (aceita / rejeitada)
 export async function atualizarStatus(id, status) {
-  const valor = (status.toLowerCase() === "aceitar") ? true : false; // mapear string para boolean
+  const valor = (status.toLowerCase() === "aceitar") ? true : false;
   const comando = `
     UPDATE proposta
        SET aprovacao = ?
@@ -66,7 +64,6 @@ export async function atualizarStatus(id, status) {
   return info.affectedRows;
 }
 
-// Listar propostas recebidas (produtos do usuário logado)
 export async function listarPropostasPorDono(usuarioId) {
   const comando = `
         SELECT proposta.id,

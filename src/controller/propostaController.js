@@ -7,7 +7,6 @@ const autenticar = getAuthentication();
 import * as propostaRepo from "../repository/propostaRepository.js";
 import * as produtoRepo from "../repository/produtoRepository.js";
 
-// Criar proposta
 endpoints.post("/proposta/:produtoId", autenticar, async (req, resp) => {
   try {
     const produtoId = req.params.produtoId;
@@ -28,7 +27,7 @@ endpoints.post("/proposta/:produtoId", autenticar, async (req, resp) => {
       produtoId,
       usuarioId,
       valorProposta,
-      false, // aprovacao inicial é falsa
+      false,
       new Date()
     );
 
@@ -46,7 +45,6 @@ endpoints.post("/proposta/:produtoId", autenticar, async (req, resp) => {
   }
 });
 
-// Aprovar/Rejeitar proposta
 endpoints.put("/proposta/:id/aprovacao", autenticar, async (req, resp) => {
   try {
     const propostaId = req.params.id;
@@ -78,7 +76,6 @@ endpoints.put("/proposta/:id/aprovacao", autenticar, async (req, resp) => {
   }
 });
 
-// Listar propostas recebidas
 endpoints.get("/propostas/recebidas", autenticar, async (req, resp) => {
   try {
     const usuarioId = req.user.id;
