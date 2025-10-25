@@ -4,7 +4,7 @@ export async function postarProd(idUsuarioLogado, produto, caminhoImagem) {
     const comando = `
         INSERT INTO produto(nome, imagem, preco, descricao, 
         disponibilidade, criacao, id_dono)
-        VALUES (?, ?, ?, ?, TRUE, NOW(), ?)`;
+        VALUES (?, ?, ?, ?, 1, NOW(), ?)`;
     const [info] = await connection.query(comando, [
         produto.nome,
         caminhoImagem,
